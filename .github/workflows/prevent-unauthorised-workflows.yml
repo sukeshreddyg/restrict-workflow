@@ -1,8 +1,6 @@
 name: Prevent unauthorized workflows
 on:
   pull_request_target:
-    paths:
-      - ".github/workflows/**"
 jobs:
     check-author:
       runs-on: ubuntu-latest
@@ -10,7 +8,24 @@ jobs:
         contents: read
         pull-requests: read
       steps:
+        - name: Get changed files
+          id: changed_files
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            FILES=$(gh pr view ${{ github.event.pull_request.number }} \
+              --repo ${{ github.repository }} \
+              --json files --jq '.files[].path')
+          
+            echo "Changed files: $FILES"
+          
+            if echo "$FILES" | grep -q "^\.github/workflows/"; then
+              echo "workflow_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "workflow_changed=false" >> $GITHUB_OUTPUT
+            fi
         - name: Check if PR author is authorized
+          if: steps.changed_files.outputs.workflow_changed == 'true'
           id: plan
           env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
