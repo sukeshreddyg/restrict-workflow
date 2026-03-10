@@ -1,0 +1,13 @@
+name: PR to Main
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print message
+        run: |
+          echo "PR is targeting main branch!"
+          echo "Hi"
