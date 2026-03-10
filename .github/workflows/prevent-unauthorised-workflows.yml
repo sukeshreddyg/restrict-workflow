@@ -1,0 +1,25 @@
+name: Prevent unauthorized workflows
+on:
+  pull_request_target:
+    paths:
+      - ".github/workflows/**"
+jobs:
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        - name: test
+          id: plan
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            AUTHOR=$(jq -r '.sender.login' $GITHUB_EVENT_PATH)
+            MEMBERS='sandeep'
+            
+            if [[ ! " $MEMBERS " =~ " $AUTHOR " ]]; then
+              echo "Only members of the '$ALLOWED_TEAM' team can create or modify workflow files."
+              exit 1
+            fi
+
+            echo "$AUTHOR is authorized to modify workflow files"
