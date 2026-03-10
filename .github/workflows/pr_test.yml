@@ -1,6 +1,6 @@
 name: PR to Main
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
 jobs:
@@ -10,4 +10,3 @@ jobs:
       - name: Print message
         run: |
           echo "PR is targeting main branch!"
-          echo "Hi"
