@@ -4,12 +4,13 @@ on:
     paths:
       - ".github/workflows/**"
 jobs:
-    test:
+    check-author:
       runs-on: ubuntu-latest
+      permissions:
+        contents: read
+        pull-requests: read
       steps:
-        - name: Checkout Repository
-          uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        - name: test
+        - name: Check if PR author is authorized
           id: plan
           env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
