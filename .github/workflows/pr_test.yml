@@ -1,6 +1,6 @@
 name: PR to Main
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
 jobs:
