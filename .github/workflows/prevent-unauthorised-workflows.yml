@@ -34,13 +34,54 @@ jobs:
             MEMBERS='sandeep'
             
             if [[ ! " $MEMBERS " =~ " $AUTHOR " ]]; then
+              echo "UNAUTHORIZED_AUTHOR=$AUTHOR" >> $GITHUB_ENV
               echo "Only members of the '$ALLOWED_TEAM' team can create or modify workflow files."
               exit 1
             fi
 
             echo "$AUTHOR is authorized to modify workflow files"
 
-        - name: fail job
+        - name: Slack failure notification
+          uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
           if: failure() && steps.plan.outcome == 'failure'
-          run: |
-            echo "Hi"
+          with:
+            webhook-type: incoming-webhook
+            payload: |
+              {
+                "blocks": [
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": ":no_entry: *Unauthorized Workflow Change Detected!*"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Workflow:*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Job:*\n${{ github.job }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Repo:*\n${{ github.repository }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Unauthorized Author:*\n${{ env.UNAUTHORIZED_AUTHOR }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*PR:*\n<${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}>"
+                      }
+                    ]
+                  }
+                ]
+              }
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
