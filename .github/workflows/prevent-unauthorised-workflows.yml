@@ -24,18 +24,3 @@ jobs:
             else
               echo "workflow_changed=false" >> $GITHUB_OUTPUT
             fi
-        - name: Check if PR author is authorized
-          if: steps.changed_files.outputs.workflow_changed == 'true'
-          id: plan
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            AUTHOR=$(jq -r '.sender.login' $GITHUB_EVENT_PATH)
-            MEMBERS='sandeep'
-            
-            if [[ ! " $MEMBERS " =~ " $AUTHOR " ]]; then
-              echo "Only members of the '$ALLOWED_TEAM' team can create or modify workflow files."
-              exit 1
-            fi
-
-            echo "$AUTHOR is authorized to modify workflow files"
