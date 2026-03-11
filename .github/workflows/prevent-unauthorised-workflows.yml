@@ -39,3 +39,8 @@ jobs:
             fi
 
             echo "$AUTHOR is authorized to modify workflow files"
+
+        - name: fail job
+          if: failure() && steps.plan.outcome == 'failure'
+          run: |
+            echo "Hi"
